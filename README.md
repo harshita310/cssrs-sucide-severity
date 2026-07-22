@@ -14,30 +14,32 @@ training targets.
 
 ```text
 .
-├── configs/
-│   └── default.yaml
-├── DATA/
-│   ├── RAW/
-│   │   └── human_n_llm_labeled_rSuicidewatch_posts.csv
-│   └── processed/
-│       ├── cssrs_processed.csv
-│       └── splits/
-│           ├── train.csv
-│           ├── val.csv
-│           └── test.csv
-├── NOTEBOOKS/
-├── RESULTS/
-│   ├── metrics/
-│   └── plots/
-├── saved_model/
-├── scripts/
-│   ├── run_pipeline.py
-│   ├── run_training.py
-│   ├── run_evaluation.py
-│   └── compare_checkpoints.py
-├── utils/
-├── README.md
-└── requirements.txt
+|-- configs/
+|   `-- default.yaml
+|-- DATA/
+|   |-- RAW/
+|   |   `-- human_n_llm_labeled_rSuicidewatch_posts.csv
+|   `-- processed/
+|       |-- cssrs_processed.csv
+|       `-- splits/
+|           |-- train.csv
+|           |-- val.csv
+|           `-- test.csv
+|-- NOTEBOOKS/
+|-- RESULTS/
+|   |-- metrics/
+|   `-- plots/
+|-- docs/
+|   `-- assets/
+|-- saved_model/
+|-- scripts/
+|   |-- run_pipeline.py
+|   |-- run_training.py
+|   |-- run_evaluation.py
+|   `-- compare_checkpoints.py
+|-- utils/
+|-- README.md
+`-- requirements.txt
 ```
 
 ## Setup
@@ -86,9 +88,9 @@ Compare all tuned checkpoints against validation and test splits:
 python scripts/compare_checkpoints.py --include-current
 ```
 
-## Current Default Training Recipe
+## Current Best Training Recipe
 
-The default config now follows the strongest existing validation sweep:
+The strongest saved sweep run is `Run_4_Vanilla_CE`:
 
 - Loss: cross entropy
 - Learning rate: `1.5e-5`
@@ -97,10 +99,34 @@ The default config now follows the strongest existing validation sweep:
 - Label smoothing: `0.0`
 - Class weights: disabled
 - Weighted sampler: disabled
-- Monitor metric: weighted F1
+- Best epoch: `16`
 
 Earlier tuning showed this recipe produced the best validation accuracy,
 macro F1, and weighted F1 among the saved sweep runs.
+
+## Best Results
+
+Best checkpoint: `saved_model/tune/best_model_Run_4_Vanilla_CE.pt`
+
+| Split | Accuracy | Macro F1 | Weighted F1 | Loss |
+| --- | ---: | ---: | ---: | ---: |
+| Train | 99.88% | 99.70% | 99.88% | 0.0112 |
+| Validation | 72.73% | 64.17% | 72.08% | 1.4932 |
+| Test | 70.45% | 61.77% | 70.74% | 1.5398 |
+
+### Training Curves
+
+![Validation accuracy](docs/assets/validation_accuracy.png)
+
+![Macro F1](docs/assets/macro_f1.png)
+
+![Weighted F1](docs/assets/weighted_f1.png)
+
+### Confusion Matrices
+
+![Validation confusion matrix](docs/assets/validation_confusion_matrix.png)
+
+![Test confusion matrix](docs/assets/test_confusion_matrix.png)
 
 ## Dataset Schema
 
@@ -116,3 +142,6 @@ macro F1, and weighted F1 among the saved sweep runs.
 Training writes checkpoints to `saved_model/` and metrics/plots to `RESULTS/`.
 Evaluation writes split summaries, reports, confusion matrices, and predictions
 under `RESULTS/metrics/evaluation/` by default.
+
+Dataset CSVs, checkpoints, and generated full result folders are intentionally
+ignored by Git to avoid publishing sensitive data or large artifacts.
