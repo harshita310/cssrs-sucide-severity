@@ -1,0 +1,29 @@
+# MentalBERT-CSSR
+# Fine-Tuning MentalBERT for Suicide Severity Detection (C-SSRS)
+# Python 3.11+
+
+# Core scientific stack
+numpy>=1.26.0,<3.0.0
+pandas>=2.1.0,<3.0.0
+scikit-learn>=1.3.0,<2.0.0
+scipy>=1.11.0,<2.0.0
+
+# Deep learning
+torch>=2.1.0
+transformers>=4.36.0,<5.0.0
+accelerate>=0.25.0
+safetensors>=0.4.0
+
+# Visualization & progress
+matplotlib>=3.8.0,<4.0.0
+seaborn>=0.13.0,<0.14.0
+tqdm>=4.66.0
+
+# Config & utilities
+PyYAML>=6.0.1
+jupyter>=1.0.0
+ipywidgets>=8.1.0
+notebook>=7.0.0
+
+# Optional but recommended for notebooks
+ipykernel>=6.27.0

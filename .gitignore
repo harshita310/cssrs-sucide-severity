@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments
+.venv/
+venv/
+env/
+
+# Local notebooks/runtime
+.ipynb_checkpoints/
+
+# Large/generated ML artifacts
+DATA/**/*.csv
+saved_model/**/*.pt
+RESULTS/metrics/**/*.csv
+RESULTS/metrics/**/*.json
+RESULTS/metrics/**/*.jsonl
+RESULTS/metrics/**/*.log
+RESULTS/**/*.png
+RESULTS/plots/**/*.png
+
+# Local secrets
+.env
+.env.*

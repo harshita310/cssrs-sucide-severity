@@ -1,0 +1,161 @@
+# =============================================================================
+# MentalBERT-CSSR — Default Experiment Configuration
+# =============================================================================
+# All training / evaluation hyperparameters live here.
+# Notebooks and scripts must load this file rather than hard-coding values.
+# =============================================================================
+
+experiment:
+  name: "mentalbert_cssr_highperf_v5"
+  dataset_name: "CSSR-S Reddit (r/SuicideWatch)"
+  description: "Fine-tune MentalBERT with the strongest validated CE recipe"
+
+# -----------------------------------------------------------------------------
+# Paths (relative to project root)
+# -----------------------------------------------------------------------------
+paths:
+  project_root: "."
+  raw_data: "DATA/RAW/human_n_llm_labeled_rSuicidewatch_posts.csv"
+  processed_data: "DATA/processed/cssrs_processed.csv"
+  save_path: "saved_model"
+  results_path: "RESULTS"
+  plots_path: "RESULTS/plots"
+  metrics_path: "RESULTS/metrics"
+  model_path: "saved_model/best_model.pt"
+  experiment_log: "RESULTS/metrics/experiment_log.jsonl"
+
+# -----------------------------------------------------------------------------
+# Data schema
+# -----------------------------------------------------------------------------
+data:
+  text_column: "content"
+  label_column: "severity"
+  # Used ONLY for later LLM benchmarking — never for training targets
+  ignore_columns:
+    - "gpt_label"
+    - "claude_label"
+    - "gemini_label"
+    - "llama_label"
+    - "mistral_label"
+  num_labels: 7
+  label_names:
+    0: "0"
+    1: "1"
+    2: "2"
+    3: "3"
+    4: "4"
+    5: "5"
+    6: "6"
+
+# -----------------------------------------------------------------------------
+# Model
+# -----------------------------------------------------------------------------
+model:
+  model_name: "mental/mental-bert-base-uncased"
+  max_length: 192          # set by Notebook 3 (99% coverage; p95~=149, p99=162)
+  truncation_side: "left"  # keep clinical climax / recent intent cues
+  dropout: 0.15            # best validation sweep setting
+  num_labels: 7
+
+# -----------------------------------------------------------------------------
+# Training — imbalance-aware high-performance recipe
+# -----------------------------------------------------------------------------
+training:
+  learning_rate: 1.5e-5
+  classifier_lr_mult: 4.0
+  weight_decay: 0.01
+  warmup_ratio: 0.12
+  label_smoothing: 0.0
+  batch_size: 8
+  gradient_accumulation_steps: 2
+  epochs: 25
+  patience: 6
+  max_grad_norm: 1.0
+  use_mixed_precision: true
+  optimizer: "AdamW"
+  scheduler: "cosine_with_warmup"
+  loss_type: "ce"
+  focal_gamma: 1.5
+  ordinal_distance_weight: 0.0
+  use_class_weights: false
+  use_weighted_sampler: false
+  freeze_encoder_epochs: 3
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+  stratify: true
+  monitor_metric: "weighted_f1"
+  # Persist held-out test split for Notebook 5 (labels never used during training fit)
+  persist_splits: true
+  splits_dir: "DATA/processed/splits"
+
+# -----------------------------------------------------------------------------
+# Reproducibility & hardware
+# -----------------------------------------------------------------------------
+runtime:
+  seed: 42
+  device: "cuda"           # resolved at runtime: cuda if available else cpu
+  num_workers: 0           # Windows-friendly default
+  pin_memory: true
+
+# -----------------------------------------------------------------------------
+# EDA (Notebook 1)
+# -----------------------------------------------------------------------------
+eda:
+  random_sample_rows: 5
+  length_percentiles: [0.50, 0.75, 0.90, 0.95, 0.99]
+  save_figures: true
+  figure_dpi: 150
+
+# -----------------------------------------------------------------------------
+# Preprocessing (Notebook 2) — conservative / clinical-signal preserving
+# -----------------------------------------------------------------------------
+preprocessing:
+  unicode_form: "NFC"
+  unescape_html: true
+  drop_exact_duplicates: true
+  drop_duplicate_text: true
+  # Persist cleaned text + human labels + metadata + LLM labels (benchmark only)
+  output_columns:
+    - "content"
+    - "severity"
+    - "url"
+    - "author"
+    - "created"
+    - "gpt_label"
+    - "claude_label"
+    - "gemini_label"
+    - "llama_label"
+    - "mistral_label"
+  # Columns used when building the supervised training matrix later
+  training_view_columns:
+    - "content"
+    - "severity"
+  save_before_after_examples: true
+  n_before_after_examples: 8
+
+# -----------------------------------------------------------------------------
+# Tokenization (Notebook 3) — MentalBERT only
+# -----------------------------------------------------------------------------
+tokenization:
+  model_name: "mental/mental-bert-base-uncased"  # locked
+  truncation_side: "left"
+  add_special_tokens: true
+  batch_size: 64
+  target_coverage: 0.99
+  candidate_max_lengths: [64, 128, 160, 192, 256, 320, 384, 512]
+  # If true, write recommended max_length back into a sidecar JSON for Notebook 4
+  write_recommendation: true
+  recommendation_path: "RESULTS/metrics/max_length_recommendation.json"
+  update_config_note: true
+
+# -----------------------------------------------------------------------------
+# Evaluation (Notebook 5 / scripts/run_evaluation.py)
+# -----------------------------------------------------------------------------
+evaluation:
+  output_dir: "RESULTS/metrics/evaluation"
+  model_path: "saved_model/tune/best_model_Run_4_Vanilla_CE.pt"
+  high_severity_threshold: 4   # severity >= 4 treated as high-risk binary band
+  splits:
+    - validation
+    - test
