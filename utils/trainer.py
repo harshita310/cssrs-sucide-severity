@@ -86,6 +86,7 @@ class TrainerConfig:
     monitor_metric: str = "macro_f1"
     loss_type: str = "focal"  # "focal" | "ce"
     focal_gamma: float = 2.0
+    ordinal_distance_weight: float = 0.0
     use_class_weights: bool = True
     gradient_accumulation_steps: int = 2
     freeze_encoder_epochs: int = 0  # optional: train head-only for N epochs
@@ -176,6 +177,8 @@ class MentalBERTTrainer:
             class_weights=weights,
             label_smoothing=config.label_smoothing,
             focal_gamma=config.focal_gamma,
+            ordinal_distance_weight=config.ordinal_distance_weight,
+            num_labels=config.num_labels,
         )
         # Move criterion buffers (class weights) to device
         self.criterion = self.criterion.to(device)

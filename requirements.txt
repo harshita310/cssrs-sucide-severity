@@ -27,3 +27,6 @@ notebook>=7.0.0
 
 # Optional but recommended for notebooks
 ipykernel>=6.27.0
+
+# Testing
+pytest>=9.0.0,<10.0.0
