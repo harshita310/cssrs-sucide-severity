@@ -87,6 +87,7 @@ class TrainerConfig:
     loss_type: str = "focal"  # "focal" | "ce"
     focal_gamma: float = 2.0
     ordinal_distance_weight: float = 0.0
+    composite_metric_weights: dict[str, float] = field(default_factory=dict)
     use_class_weights: bool = True
     gradient_accumulation_steps: int = 2
     freeze_encoder_epochs: int = 0  # optional: train head-only for N epochs
@@ -100,6 +101,16 @@ class TrainerConfig:
 
 
 _NO_DECAY_SUFFIXES = ("bias", "LayerNorm.weight", "layer_norm.weight")
+
+
+def compute_composite_score(
+    metrics: dict[str, Any],
+    weights: dict[str, float],
+) -> float:
+    """Weighted sum of named metrics for balanced checkpoint selection."""
+    return float(
+        sum(float(metrics[name]) * float(weight) for name, weight in weights.items())
+    )
 
 
 def _is_head_param(name: str) -> bool:
@@ -372,6 +383,15 @@ class MentalBERTTrainer:
 
             train_metrics = self._train_epoch()
             val_metrics = self.evaluate(self.val_loader)
+            if self.config.composite_metric_weights:
+                train_metrics["composite_score"] = compute_composite_score(
+                    train_metrics,
+                    self.config.composite_metric_weights,
+                )
+                val_metrics["composite_score"] = compute_composite_score(
+                    val_metrics,
+                    self.config.composite_metric_weights,
+                )
 
             row = {
                 "epoch": epoch,
@@ -390,6 +410,9 @@ class MentalBERTTrainer:
             row["val_micro_f1"] = val_metrics["micro_f1"]
             row["train_weighted_f1"] = train_metrics["weighted_f1"]
             row["val_weighted_f1"] = val_metrics["weighted_f1"]
+            if "composite_score" in train_metrics:
+                row["train_composite_score"] = train_metrics["composite_score"]
+                row["val_composite_score"] = val_metrics["composite_score"]
 
             self.history.append(row)
 
