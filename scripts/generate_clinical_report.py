@@ -15,8 +15,44 @@ from knowledge_graph.graph_loader import Neo4jSettings, open_driver
 from knowledge_graph.recommendation_engine import rank_recommendations
 from knowledge_graph.retriever import retrieve_intervention_rows
 from knowledge_graph.shap_mapper import map_shap_tokens
+from knowledge_graph.text import normalize_key
 from utils import load_config, set_seed
 from xai.shap_explainer import explain_text, load_final_predictor, write_shap_artifacts
+
+STOPWORD_KEYS = {
+    "i",
+    "me",
+    "my",
+    "mine",
+    "you",
+    "your",
+    "and",
+    "or",
+    "but",
+    "the",
+    "a",
+    "an",
+    "to",
+    "of",
+    "in",
+    "on",
+    "for",
+    "with",
+    "here",
+    "there",
+    "this",
+    "that",
+    "feel",
+}
+
+ALLOWED_PHRASE_KEYS = {
+    "cannot sleep",
+    "cant sleep",
+    "self harm",
+    "hurt myself",
+    "cut myself",
+    "no hope",
+}
 
 
 def parse_args():
@@ -35,6 +71,43 @@ def parse_args():
 def _default_run_id(text: str) -> str:
     preview = re.sub(r"[^a-zA-Z0-9]+", "_", text.lower()).strip("_")
     return preview[:40] or "sample_text"
+
+
+def report_mapping_factors(positive, negative):
+    """Return meaningful SHAP factors for graph mapping and reporting."""
+    selected = []
+    seen = set()
+    for factor in sorted(
+        [*positive, *negative],
+        key=lambda item: abs(float(item.value)),
+        reverse=True,
+    ):
+        key = normalize_key(factor.token)
+        parts = key.split()
+        has_stopword_part = any(part in STOPWORD_KEYS for part in parts)
+        if (
+            not key
+            or key in STOPWORD_KEYS
+            or (has_stopword_part and key not in ALLOWED_PHRASE_KEYS)
+            or key in seen
+        ):
+            continue
+        seen.add(key)
+        selected.append(factor)
+
+    selected_keys = {normalize_key(factor.token) for factor in selected}
+    phrase_parts = {
+        part
+        for key in selected_keys
+        if " " in key
+        for part in key.split()
+    }
+    return [
+        factor
+        for factor in selected
+        if " " in normalize_key(factor.token)
+        or normalize_key(factor.token) not in phrase_parts
+    ]
 
 
 def main() -> None:
@@ -57,9 +130,13 @@ def main() -> None:
 
     settings = Neo4jSettings.from_config(cfg)
     driver = open_driver(settings)
+    mapping_factors = report_mapping_factors(
+        explanation.positive,
+        explanation.negative,
+    )
     try:
         with driver.session(database=settings.database) as session:
-            concepts = map_shap_tokens(session, explanation.positive)
+            concepts = map_shap_tokens(session, mapping_factors)
             rows = retrieve_intervention_rows(
                 session,
                 concepts=concepts,
@@ -75,8 +152,12 @@ def main() -> None:
     report = build_report(
         input_preview=args.text[:240],
         prediction=explanation.prediction,
-        positive_factors=explanation.positive,
-        negative_factors=explanation.negative,
+        positive_factors=[
+            factor for factor in mapping_factors if factor.direction == "positive"
+        ],
+        negative_factors=[
+            factor for factor in mapping_factors if factor.direction == "negative"
+        ],
         concepts=concepts,
         recommendations=recommendations,
     )

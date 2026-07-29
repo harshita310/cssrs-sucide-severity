@@ -171,9 +171,22 @@ def _explain_text_occlusion_fallback(
     prediction = predictor.predict_one(text)
     base_prob = float(predictor.predict_proba([text])[0][prediction.label])
     tokens = text.split()
+    spans: list[tuple[str, list[int]]] = [
+        (token, [index]) for index, token in enumerate(tokens)
+    ]
+    spans.extend(
+        (
+            f"{tokens[index]} {tokens[index + 1]}",
+            [index, index + 1],
+        )
+        for index in range(len(tokens) - 1)
+    )
     value_rows: list[dict[str, Any]] = []
-    for index, token in enumerate(tokens):
-        masked_text = " ".join(tokens[:index] + tokens[index + 1 :])
+    for token, indices in spans:
+        masked_tokens = [
+            current for index, current in enumerate(tokens) if index not in indices
+        ]
+        masked_text = " ".join(masked_tokens)
         masked_prob = float(
             predictor.predict_proba([masked_text or " "])[0][prediction.label]
         )
