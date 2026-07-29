@@ -223,6 +223,54 @@ def _risk_band(label: int | None) -> tuple[str, str]:
     return "Urgent", "urgent"
 
 
+def _severity_meaning(label: int | None) -> str:
+    meanings = {
+        0: "Label 0: no or minimal detected suicide-severity signal in this model output.",
+        1: "Label 1: low monitored severity; early or indirect distress signal.",
+        2: "Label 2: mild-to-moderate indicator requiring contextual review.",
+        3: "Label 3: moderate severity signal; review support needs and protective factors.",
+        4: "Label 4: high severity band; safety planning and professional support should be considered.",
+        5: "Label 5: very high severity band; urgent support pathways may be relevant.",
+        6: "Label 6: urgent/highest severity band; immediate crisis or emergency support may be relevant.",
+    }
+    return meanings.get(label, "Label unavailable: severity meaning could not be resolved.")
+
+
+def _decision_trace_html(report: dict[str, Any]) -> str:
+    concepts = report.get("mapped_concepts", [])
+    recommendations = report.get("recommendations", [])
+    if not concepts and not recommendations:
+        return "<p class=\"muted\">No traceable graph path was produced.</p>"
+
+    rows = []
+    for rec in recommendations:
+        rec_concepts = set(rec.get("concepts", []))
+        linked_concepts = [
+            concept for concept in concepts if concept.get("name") in rec_concepts
+        ]
+        if not linked_concepts:
+            linked_concepts = concepts[:1]
+        evidence_name = "Graph evidence"
+        if rec.get("evidence_chunks"):
+            evidence_name = rec["evidence_chunks"][0].get("document_name", evidence_name)
+        elif rec.get("evidence"):
+            evidence_name = rec["evidence"][0].get("name", evidence_name)
+        for concept in linked_concepts:
+            token = concept.get("matched_alias", "SHAP factor")
+            rows.append(
+                "<div class=\"trace-row\">"
+                f"<span>{escape(str(token))}</span>"
+                "<b>maps to</b>"
+                f"<span>{escape(str(concept.get('name', 'Concept')))}</span>"
+                "<b>recommends</b>"
+                f"<span>{escape(str(rec.get('name', 'Intervention')))}</span>"
+                "<b>supported by</b>"
+                f"<span>{escape(str(evidence_name))}</span>"
+                "</div>"
+            )
+    return "".join(rows)
+
+
 def _html_list(items: list[str]) -> str:
     if not items:
         return "<p class=\"muted\">No linked items available.</p>"
@@ -239,6 +287,7 @@ def _html_report(
     label = prediction.get("label")
     confidence = float(prediction.get("confidence", 0.0))
     band, band_class = _risk_band(label if isinstance(label, int) else None)
+    severity_meaning = _severity_meaning(label if isinstance(label, int) else None)
     positive = report.get("shap", {}).get("positive_factors", [])
     negative = report.get("shap", {}).get("negative_factors", [])
     concepts = report.get("mapped_concepts", [])
@@ -407,6 +456,43 @@ def _html_report(
       background: #f8fafc;
     }}
     .chip span, .muted {{ color: var(--muted); font-size: 13px; }}
+    .method-strip {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }}
+    .method-strip span {{
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      padding: 10px;
+      font-size: 13px;
+      text-align: center;
+      font-weight: 700;
+    }}
+    .severity-note {{
+      border-left: 4px solid var(--blue);
+      padding: 10px 12px;
+      background: #f8fafc;
+      border-radius: 6px;
+      margin-top: 10px;
+    }}
+    .trace-row {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 0;
+    }}
+    .trace-row span {{
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 999px;
+      padding: 5px 9px;
+    }}
+    .trace-row b {{ color: var(--muted); font-size: 13px; }}
     .recommendation-card {{
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -462,6 +548,12 @@ def _html_report(
       <div>
         <h1>Clinical Decision Support Report</h1>
         <p class=\"disclaimer\">{escape(str(report.get("disclaimer", DISCLAIMER)))}</p>
+        <div class=\"method-strip\" aria-label=\"Pipeline method\">
+          <span>MentalBERT</span>
+          <span>XAI factors</span>
+          <span>Neo4j graph</span>
+          <span>Evidence retrieval</span>
+        </div>
       </div>
       <aside class=\"risk-badge {band_class}\">
         <span>Severity label {escape(str(label))}</span>
@@ -469,6 +561,12 @@ def _html_report(
         <span>{confidence:.2%} confidence</span>
       </aside>
     </header>
+
+    <section class=\"section\">
+      <h2>MentalBERT + XAI + Neo4j Summary</h2>
+      <p class=\"severity-note\">{escape(severity_meaning)}</p>
+      <p class=\"muted\">The model prediction is interpreted through token-level attribution, mapped to graph concepts, then connected to evidence-backed interventions through Neo4j traversal.</p>
+    </section>
 
     <section class=\"section\">
       <h2>Visual Summary</h2>
@@ -489,6 +587,11 @@ def _html_report(
     <section class=\"section\">
       <h2>Mapped Graph Concepts</h2>
       {concept_cards}
+    </section>
+
+    <section class=\"section\">
+      <h2>Decision Trace</h2>
+      {_decision_trace_html(report)}
     </section>
 
     <section class=\"section\">

@@ -80,6 +80,9 @@ def test_write_report_creates_json_and_markdown(tmp_path: Path):
     assert "sample_graph_path.png" in markdown
     html = paths["html"].read_text(encoding="utf-8")
     assert "clinical-report-shell" in html
+    assert "MentalBERT + XAI + Neo4j" in html
+    assert "Decision Trace" in html
+    assert "Label 2" in html
     assert "sample_shap_chart.png" in html
     assert "sample_graph_path.png" in html
     assert "Support options" in html
