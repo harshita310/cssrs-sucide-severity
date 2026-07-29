@@ -34,3 +34,7 @@ class Recommendation:
     concepts: list[str] = field(default_factory=list)
     evidence: list[dict] = field(default_factory=list)
     resources: list[dict] = field(default_factory=list)
+    description: str = ""
+    action_steps: list[str] = field(default_factory=list)
+    support_options: list[str] = field(default_factory=list)
+    evidence_chunks: list[dict] = field(default_factory=list)

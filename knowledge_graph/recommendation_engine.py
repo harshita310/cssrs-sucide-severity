@@ -29,8 +29,10 @@ def rank_recommendations(rows: list[dict], top_k: int) -> list[Recommendation]:
             "concepts": set(),
             "shap_total": 0.0,
             "evidence": [],
+            "chunks": [],
             "resources": [],
             "severity_matched": False,
+            "props": {},
         }
     )
 
@@ -39,6 +41,8 @@ def rank_recommendations(rows: list[dict], top_k: int) -> list[Recommendation]:
         if not intervention:
             continue
         item = grouped[str(intervention)]
+        if row.get("intervention_props"):
+            item["props"].update(dict(row["intervention_props"]))
         concept = row.get("concept")
         if concept:
             item["concepts"].add(str(concept))
@@ -47,22 +51,27 @@ def rank_recommendations(rows: list[dict], top_k: int) -> list[Recommendation]:
             item["severity_matched"] = True
         if row.get("evidence"):
             item["evidence"].append(dict(row["evidence"]))
+        if row.get("chunk"):
+            item["chunks"].append(dict(row["chunk"]))
         if row.get("resource"):
             item["resources"].append(dict(row["resource"]))
 
     recommendations: list[Recommendation] = []
     for name, item in grouped.items():
         evidence = _dedupe_dicts(item["evidence"])
+        chunks = _dedupe_dicts(item["chunks"])
         resources = _dedupe_dicts(item["resources"])
-        if not evidence:
+        if not evidence and not chunks:
             continue
         severity_bonus = 0.5 if item["severity_matched"] else 0.0
         score = (
             float(item["shap_total"])
             + (0.25 * len(evidence))
+            + (0.20 * len(chunks))
             + (0.15 * len(resources))
             + severity_bonus
         )
+        props = item["props"]
         recommendations.append(
             Recommendation(
                 name=name,
@@ -70,6 +79,10 @@ def rank_recommendations(rows: list[dict], top_k: int) -> list[Recommendation]:
                 concepts=sorted(item["concepts"]),
                 evidence=evidence,
                 resources=resources,
+                description=str(props.get("description", "")),
+                action_steps=list(props.get("action_steps", []) or []),
+                support_options=list(props.get("support_options", []) or []),
+                evidence_chunks=chunks,
             )
         )
 

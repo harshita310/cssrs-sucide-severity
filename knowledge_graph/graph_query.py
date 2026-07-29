@@ -23,24 +23,30 @@ def intervention_query() -> str:
     MATCH (c)-[:TREATED_BY|BENEFITS_FROM]->(i:Intervention)
     OPTIONAL MATCH (s:SeverityBand {level: $severity})-[:RECOMMENDS]->(i)
     OPTIONAL MATCH (i)-[:SUPPORTED_BY]->(e:EvidenceSource)
+    OPTIONAL MATCH (chunk:EvidenceChunk)-[:SUPPORTS]->(i)
     OPTIONAL MATCH (i)-[:USES_RESOURCE]->(r:Resource)
     RETURN
         i.name AS intervention,
+        properties(i) AS intervention_props,
         c.name AS concept,
         $concept_values[c.name] AS shap_value,
         CASE WHEN s IS NULL THEN false ELSE true END AS severity_matched,
         CASE WHEN e IS NULL THEN NULL ELSE properties(e) END AS evidence,
+        CASE WHEN chunk IS NULL THEN NULL ELSE properties(chunk) END AS chunk,
         CASE WHEN r IS NULL THEN NULL ELSE properties(r) END AS resource
     UNION
     MATCH (s:SeverityBand {level: $severity})-[:RECOMMENDS]->(i:Intervention)
     OPTIONAL MATCH (i)-[:SUPPORTED_BY]->(e:EvidenceSource)
+    OPTIONAL MATCH (chunk:EvidenceChunk)-[:SUPPORTS]->(i)
     OPTIONAL MATCH (i)-[:USES_RESOURCE]->(r:Resource)
     RETURN
         i.name AS intervention,
+        properties(i) AS intervention_props,
         NULL AS concept,
         0.0 AS shap_value,
         true AS severity_matched,
         CASE WHEN e IS NULL THEN NULL ELSE properties(e) END AS evidence,
+        CASE WHEN chunk IS NULL THEN NULL ELSE properties(chunk) END AS chunk,
         CASE WHEN r IS NULL THEN NULL ELSE properties(r) END AS resource
     """
 

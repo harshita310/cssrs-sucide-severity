@@ -69,11 +69,32 @@ def _markdown_report(report: dict[str, Any]) -> str:
     lines.extend(["", "## Evidence-Backed Recommendations"])
     for rec in report.get("recommendations", []):
         lines.append(f"- {rec['name']} | score={rec['score']:.4f}")
+        if rec.get("description"):
+            lines.append(f"  Why this helps: {rec['description']}")
         if rec.get("concepts"):
             lines.append(f"  Concepts: {', '.join(rec['concepts'])}")
+        if rec.get("action_steps"):
+            lines.append("  Suggested steps:")
+            for step in rec["action_steps"]:
+                lines.append(f"  - {step}")
+        if rec.get("support_options"):
+            lines.append("  Support options:")
+            for option in rec["support_options"]:
+                lines.append(f"  - {option}")
         if rec.get("evidence"):
             evidence_names = [item.get("name", "") for item in rec["evidence"]]
             lines.append(f"  Evidence: {', '.join(evidence_names)}")
+        if rec.get("evidence_chunks"):
+            lines.append("  Evidence chunks:")
+            for chunk in rec["evidence_chunks"]:
+                source = chunk.get("document_name", "Evidence document")
+                section = chunk.get("section_title", "Section")
+                lines.append(
+                    f"  - {source} / {section} [{chunk.get('chunk_id', '')}]"
+                )
+                lines.append(f"    {chunk.get('text', '')}")
+                if chunk.get("url"):
+                    lines.append(f"    Source: {chunk['url']}")
         if rec.get("resources"):
             resource_names = [item.get("name", "") for item in rec["resources"]]
             lines.append(f"  Resources: {', '.join(resource_names)}")

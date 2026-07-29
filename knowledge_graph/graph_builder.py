@@ -10,6 +10,7 @@ from .seed_data import (
     INTERVENTION_RESOURCE_LINKS,
     SEED_CONCEPTS,
     SEED_EVIDENCE,
+    SEED_EVIDENCE_DOCUMENTS,
     SEED_INTERVENTIONS,
     SEED_RESOURCES,
     SEVERITY_INTERVENTION_LINKS,
@@ -23,6 +24,9 @@ def _node_statement(label: str) -> str:
         "Emotion",
         "Intervention",
         "EvidenceSource",
+        "EvidenceDocument",
+        "EvidenceSection",
+        "EvidenceChunk",
         "Resource",
     }
     if label not in allowed:
@@ -74,6 +78,75 @@ def build_seed_statements() -> list[tuple[str, dict[str, Any]]]:
                 {"name": evidence["name"], "props": evidence},
             )
         )
+
+    for document in SEED_EVIDENCE_DOCUMENTS:
+        document_props = {
+            key: value for key, value in document.items() if key != "sections"
+        }
+        statements.append(
+            (
+                _node_statement("EvidenceDocument"),
+                {"name": document["name"], "props": document_props},
+            )
+        )
+        for section_index, section in enumerate(document.get("sections", []), start=1):
+            section_key = f"{document['name']}::{section['title']}"
+            statements.append(
+                (
+                    """
+                    MATCH (d:EvidenceDocument {name: $document_name})
+                    MERGE (s:EvidenceSection {key: $section_key})
+                    SET s.title = $title, s.order = $order
+                    MERGE (d)-[:HAS_SECTION]->(s)
+                    """,
+                    {
+                        "document_name": document["name"],
+                        "section_key": section_key,
+                        "title": section["title"],
+                        "order": section_index,
+                    },
+                )
+            )
+            for chunk_index, chunk in enumerate(section.get("chunks", []), start=1):
+                chunk_props = {
+                    "chunk_id": chunk["chunk_id"],
+                    "text": chunk["text"],
+                    "order": chunk_index,
+                    "document_name": document["name"],
+                    "section_title": section["title"],
+                    "url": document.get("url", ""),
+                    "citation": document.get("citation", ""),
+                    "source_type": document.get("source_type", ""),
+                }
+                statements.append(
+                    (
+                        """
+                        MATCH (s:EvidenceSection {key: $section_key})
+                        MERGE (c:EvidenceChunk {chunk_id: $chunk_id})
+                        SET c += $props
+                        MERGE (s)-[:HAS_CHUNK]->(c)
+                        """,
+                        {
+                            "section_key": section_key,
+                            "chunk_id": chunk["chunk_id"],
+                            "props": chunk_props,
+                        },
+                    )
+                )
+                for intervention_name in chunk.get("supports", []):
+                    statements.append(
+                        (
+                            """
+                            MATCH (c:EvidenceChunk {chunk_id: $chunk_id})
+                            MATCH (i:Intervention {name: $intervention_name})
+                            MERGE (c)-[:SUPPORTS]->(i)
+                            """,
+                            {
+                                "chunk_id": chunk["chunk_id"],
+                                "intervention_name": intervention_name,
+                            },
+                        )
+                    )
 
     for resource in SEED_RESOURCES:
         statements.append(
