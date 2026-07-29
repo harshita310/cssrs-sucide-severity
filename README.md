@@ -36,6 +36,8 @@ training targets.
 |   |-- run_pipeline.py
 |   |-- run_training.py
 |   |-- run_evaluation.py
+|   |-- run_ordinal_experiments.py
+|   |-- run_focused_experiments.py
 |   `-- compare_checkpoints.py
 |-- utils/
 |-- README.md
@@ -79,7 +81,7 @@ python scripts/run_pipeline.py --skip-training
 Evaluate a specific checkpoint:
 
 ```bash
-python scripts/run_evaluation.py --model-path saved_model/tune/best_model_Run_4_Vanilla_CE.pt
+python scripts/run_evaluation.py --model-path saved_model/focused_experiments/best_model_focused_ce_do_0_20_lr_1_2e5_ls_0_03.pt
 ```
 
 Compare all tuned checkpoints against validation and test splits:
@@ -88,31 +90,54 @@ Compare all tuned checkpoints against validation and test splits:
 python scripts/compare_checkpoints.py --include-current
 ```
 
-## Current Best Training Recipe
+## Final Model
 
-The strongest saved sweep run is `Run_4_Vanilla_CE`:
+The final model selected for SHAP/LIME and downstream explanation is
+`focused_ce_do_0_20_lr_1_2e5_ls_0_03`.
 
 - Loss: cross entropy
-- Learning rate: `1.5e-5`
-- Dropout: `0.15`
-- Weight decay: `0.01`
-- Label smoothing: `0.0`
+- Learning rate: `1.2e-5`
+- Dropout: `0.20`
+- Weight decay: `0.02`
+- Label smoothing: `0.03`
 - Class weights: disabled
 - Weighted sampler: disabled
-- Best epoch: `16`
+- Checkpoint selection: composite score using weighted F1, macro F1, and
+  quadratic weighted kappa
+- Best epoch: `13`
 
-Earlier tuning showed this recipe produced the best validation accuracy,
-macro F1, and weighted F1 among the saved sweep runs.
+This focused CE model is used as the main model because it gives the strongest
+overall F1 balance while remaining simpler to explain with softmax
+probabilities and word-level SHAP/LIME attributions.
 
 ## Best Results
 
-Best checkpoint: `saved_model/tune/best_model_Run_4_Vanilla_CE.pt`
+Final checkpoint:
+`saved_model/focused_experiments/best_model_focused_ce_do_0_20_lr_1_2e5_ls_0_03.pt`
 
 | Split | Accuracy | Macro F1 | Weighted F1 | Loss |
 | --- | ---: | ---: | ---: | ---: |
-| Train | 99.88% | 99.70% | 99.88% | 0.0112 |
-| Validation | 72.73% | 64.17% | 72.08% | 1.4932 |
-| Test | 70.45% | 61.77% | 70.74% | 1.5398 |
+| Train | 95.48% | 84.08% | 94.61% | 0.2925 |
+| Validation | 72.16% | 61.31% | 71.55% | 1.0703 |
+| Test | 73.30% | 62.68% | 73.35% | 0.9863 |
+
+## Retained Comparison Model
+
+The ordinal CE model is retained for explanation and ablation, but it is not the
+main SHAP/LIME model:
+
+Checkpoint:
+`saved_model/ordinal_experiments/best_model_ordinal_ce_dw_0_30_do_0_25.pt`
+
+| Model | Test Accuracy | Test Macro F1 | Test Weighted F1 | Test QWK | Test Within-1 | Test High-Severity F1 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Final focused CE | 73.30% | 62.68% | 73.35% | 79.32% | 85.80% | 78.87% |
+| Retained ordinal CE | 73.86% | 60.23% | 72.55% | 81.66% | 87.50% | 80.00% |
+
+The ordinal model remains useful because severity labels are ordered from `0` to
+`6`, so QWK, within-1 accuracy, and high-severity F1 show whether mistakes stay
+near the correct severity band. The focused CE model is kept as final because it
+has the best macro and weighted F1 for class-level explanation.
 
 ### Training Curves
 

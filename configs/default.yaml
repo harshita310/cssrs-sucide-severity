@@ -6,9 +6,9 @@
 # =============================================================================
 
 experiment:
-  name: "mentalbert_cssr_highperf_v5"
+  name: "mentalbert_cssr_focused_ce_final"
   dataset_name: "CSSR-S Reddit (r/SuicideWatch)"
-  description: "Fine-tune MentalBERT with the strongest validated CE recipe"
+  description: "Focused CE MentalBERT final model selected for SHAP/LIME explanation"
 
 # -----------------------------------------------------------------------------
 # Paths (relative to project root)
@@ -21,7 +21,7 @@ paths:
   results_path: "RESULTS"
   plots_path: "RESULTS/plots"
   metrics_path: "RESULTS/metrics"
-  model_path: "saved_model/best_model.pt"
+  model_path: "saved_model/focused_experiments/best_model_focused_ce_do_0_20_lr_1_2e5_ls_0_03.pt"
   experiment_log: "RESULTS/metrics/experiment_log.jsonl"
 
 # -----------------------------------------------------------------------------
@@ -54,18 +54,18 @@ model:
   model_name: "mental/mental-bert-base-uncased"
   max_length: 192          # set by Notebook 3 (99% coverage; p95~=149, p99=162)
   truncation_side: "left"  # keep clinical climax / recent intent cues
-  dropout: 0.15            # best validation sweep setting
+  dropout: 0.20            # final focused CE setting
   num_labels: 7
 
 # -----------------------------------------------------------------------------
-# Training — imbalance-aware high-performance recipe
+# Training — final focused CE recipe
 # -----------------------------------------------------------------------------
 training:
-  learning_rate: 1.5e-5
+  learning_rate: 1.2e-5
   classifier_lr_mult: 4.0
-  weight_decay: 0.01
+  weight_decay: 0.02
   warmup_ratio: 0.12
-  label_smoothing: 0.0
+  label_smoothing: 0.03
   batch_size: 8
   gradient_accumulation_steps: 2
   epochs: 25
@@ -79,7 +79,7 @@ training:
   ordinal_distance_weight: 0.0
   use_class_weights: false
   use_weighted_sampler: false
-  freeze_encoder_epochs: 3
+  freeze_encoder_epochs: 0
   train_ratio: 0.70
   val_ratio: 0.15
   test_ratio: 0.15
@@ -154,7 +154,7 @@ tokenization:
 # -----------------------------------------------------------------------------
 evaluation:
   output_dir: "RESULTS/metrics/evaluation"
-  model_path: "saved_model/tune/best_model_Run_4_Vanilla_CE.pt"
+  model_path: "saved_model/focused_experiments/best_model_focused_ce_do_0_20_lr_1_2e5_ls_0_03.pt"
   high_severity_threshold: 4   # severity >= 4 treated as high-risk binary band
   splits:
     - validation
