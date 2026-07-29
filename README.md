@@ -206,6 +206,8 @@ Outputs:
 
 - SHAP artifacts: `RESULTS/xai/shap/`
 - Clinical reports: `RESULTS/xai/reports/`
+- Visual report assets: `<run_id>_shap_chart.png` and
+  `<run_id>_graph_path.png` beside each Markdown report
 
 The Neo4j graph stores curated evidence as document-style nodes:
 
