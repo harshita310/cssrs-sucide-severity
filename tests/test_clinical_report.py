@@ -53,6 +53,15 @@ def test_write_report_creates_json_and_markdown(tmp_path: Path):
                 "score": 1.2,
                 "concepts": ["Isolation"],
                 "evidence": [{"name": "WHO Suicide Prevention Guidance"}],
+                "evidence_chunks": [
+                    {
+                        "chunk_id": "who-1",
+                        "text": "Support groups and health workers can help.",
+                        "document_name": "WHO Suicide Q&A",
+                        "section_title": "Support",
+                        "url": "https://www.who.int/news-room/questions-and-answers/item/suicide",
+                    }
+                ],
                 "resources": [{"name": "Support Group"}],
             }
         ],
@@ -63,8 +72,15 @@ def test_write_report_creates_json_and_markdown(tmp_path: Path):
         "label"
     ] == 2
     assert paths["markdown"].exists()
+    assert paths["html"].exists()
     assert paths["shap_chart"].exists()
     assert paths["graph_path"].exists()
     markdown = paths["markdown"].read_text(encoding="utf-8")
     assert "sample_shap_chart.png" in markdown
     assert "sample_graph_path.png" in markdown
+    html = paths["html"].read_text(encoding="utf-8")
+    assert "clinical-report-shell" in html
+    assert "sample_shap_chart.png" in html
+    assert "sample_graph_path.png" in html
+    assert "Support options" in html
+    assert "<a href=" in html
