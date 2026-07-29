@@ -159,3 +159,21 @@ evaluation:
   splits:
     - validation
     - test
+
+# -----------------------------------------------------------------------------
+# Neo4j knowledge graph
+# -----------------------------------------------------------------------------
+neo4j:
+  uri: "bolt://localhost:7687"
+  username: "neo4j"
+  password_env: "NEO4J_PASSWORD"
+  database: "neo4j"
+
+# -----------------------------------------------------------------------------
+# Explainability and clinical report outputs
+# -----------------------------------------------------------------------------
+xai:
+  shap_output_dir: "RESULTS/xai/shap"
+  reports_output_dir: "RESULTS/xai/reports"
+  top_k_tokens: 12
+  top_k_recommendations: 5
