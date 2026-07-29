@@ -105,9 +105,12 @@ def explain_text(
     try:
         import shap
     except ImportError as exc:
-        raise RuntimeError(
-            "SHAP is not installed. Run `pip install -r requirements.txt` first."
-        ) from exc
+        return _explain_text_occlusion_fallback(
+            predictor,
+            text,
+            top_k=top_k,
+            import_error=str(exc),
+        )
 
     prediction = predictor.predict_one(text)
     masker = shap.maskers.Text(predictor.tokenizer)
@@ -157,6 +160,67 @@ def explain_text(
     )
 
 
+def _explain_text_occlusion_fallback(
+    predictor,
+    text: str,
+    *,
+    top_k: int,
+    import_error: str,
+) -> ShapExplanation:
+    """Produce deterministic token attributions when SHAP cannot import."""
+    prediction = predictor.predict_one(text)
+    base_prob = float(predictor.predict_proba([text])[0][prediction.label])
+    tokens = text.split()
+    value_rows: list[dict[str, Any]] = []
+    for index, token in enumerate(tokens):
+        masked_text = " ".join(tokens[:index] + tokens[index + 1 :])
+        masked_prob = float(
+            predictor.predict_proba([masked_text or " "])[0][prediction.label]
+        )
+        value_rows.append(
+            {
+                "token": token,
+                "value": base_prob - masked_prob,
+                "method": "occlusion_fallback",
+                "shap_import_error": import_error,
+            }
+        )
+
+    positive_rows = sorted(
+        [row for row in value_rows if row["value"] > 0],
+        key=lambda row: row["value"],
+        reverse=True,
+    )[:top_k]
+    negative_rows = sorted(
+        [row for row in value_rows if row["value"] < 0],
+        key=lambda row: row["value"],
+    )[:top_k]
+    positive = [
+        ShapTokenFactor(
+            token=str(row["token"]),
+            value=float(row["value"]),
+            rank=idx + 1,
+            direction="positive",
+        )
+        for idx, row in enumerate(positive_rows)
+    ]
+    negative = [
+        ShapTokenFactor(
+            token=str(row["token"]),
+            value=float(row["value"]),
+            rank=idx + 1,
+            direction="negative",
+        )
+        for idx, row in enumerate(negative_rows)
+    ]
+    return ShapExplanation(
+        prediction=prediction,
+        positive=positive,
+        negative=negative,
+        values=value_rows,
+    )
+
+
 def _explanation_payload(explanation: ShapExplanation) -> dict[str, Any]:
     return {
         "prediction": asdict(explanation.prediction),
@@ -179,8 +243,16 @@ def write_shap_artifacts(
     payload = _explanation_payload(explanation)
     json_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
+    extra_fields = sorted(
+        {
+            key
+            for row in explanation.values
+            for key in row
+            if key not in {"token", "value"}
+        }
+    )
     with csv_path.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=["token", "value"])
+        writer = csv.DictWriter(fh, fieldnames=["token", "value", *extra_fields])
         writer.writeheader()
         writer.writerows(explanation.values)
 
