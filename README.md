@@ -202,6 +202,14 @@ Generate the full structured report:
 python scripts/generate_clinical_report.py --text "I feel hopeless and alone"
 ```
 
+### HTML Report Preview
+
+The latest report UI includes a severity badge, MentalBERT + XAI + Neo4j method
+summary, SHAP chart, explanation graph path, decision trace, recommendation
+cards, support options, and evidence links.
+
+![XAI HTML clinical report](docs/assets/xai_html_report.png)
+
 Outputs:
 
 - SHAP artifacts: `RESULTS/xai/shap/`
