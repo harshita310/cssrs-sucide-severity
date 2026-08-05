@@ -297,8 +297,10 @@ V2 dashboard sections:
 - SHAP explorer: clickable positive and negative token attributions
 - Evidence explorer: source cards with evidence level, section, snippet,
   similarity score, and original source link
-- Knowledge graph: interactive React Flow graph with token, concept,
-  intervention, evidence, and resource nodes
+- Source coverage: WHO, NICE, CDC, SAMHSA, APA-oriented guidance, and curated
+  clinical review chunks where available
+- Decision pathway: detected words mapped to clinical concepts, graph-selected
+  guidance, evidence snippets, and source links
 - Recommendation explorer: graph-selected interventions with mapped concepts,
   evidence, action steps, and support options
 - Literature panel: searchable retrieved evidence chunks by source family

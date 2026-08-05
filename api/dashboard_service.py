@@ -208,6 +208,46 @@ def _graph_payload(
     return {"nodes": list(nodes.values()), "edges": edges, "trace": trace}
 
 
+def _pathways(
+    *,
+    concepts: list[MappedConcept],
+    recommendations: list[Recommendation],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for concept in concepts:
+        linked_recommendations = [
+            recommendation
+            for recommendation in recommendations
+            if concept.name in recommendation.concepts
+        ]
+        for recommendation in linked_recommendations:
+            evidence_chunk = recommendation.evidence_chunks[0] if recommendation.evidence_chunks else {}
+            fallback_evidence = (
+                recommendation.evidence[0].get("name", "Evidence")
+                if recommendation.evidence
+                else "Evidence"
+            )
+            rows.append(
+                {
+                    "detectedText": concept.matched_alias,
+                    "mappedConcept": concept.name,
+                    "conceptType": concept.label,
+                    "shapValue": float(concept.shap_value),
+                    "guidance": recommendation.name,
+                    "whySelected": (
+                        f"{concept.name} is connected to {recommendation.name} "
+                        "through Neo4j graph traversal."
+                    ),
+                    "evidenceSource": str(
+                        evidence_chunk.get("document_name") or fallback_evidence
+                    ),
+                    "evidenceSnippet": str(evidence_chunk.get("text") or ""),
+                    "sourceUrl": str(evidence_chunk.get("url") or ""),
+                }
+            )
+    return rows
+
+
 def build_dashboard_payload(
     *,
     text: str,
@@ -244,6 +284,7 @@ def build_dashboard_payload(
             concepts=concepts,
             recommendations=recommendations,
         ),
+        "pathways": _pathways(concepts=concepts, recommendations=recommendations),
         "evidence": evidence,
         "recommendations": [
             {

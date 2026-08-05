@@ -7,13 +7,12 @@ import {
   Moon,
   Search,
   ShieldCheck,
-  Sparkles,
   Sun,
 } from "lucide-react";
 import { analyzeText, fallbackDashboard } from "./api.js";
 import { EvidenceExplorer } from "./components/EvidenceExplorer.jsx";
-import { GraphPanel } from "./components/GraphPanel.jsx";
 import { LiteraturePanel } from "./components/LiteraturePanel.jsx";
+import { PathwayPanel } from "./components/PathwayPanel.jsx";
 import { PredictionPanel } from "./components/PredictionPanel.jsx";
 import { RecommendationExplorer } from "./components/RecommendationExplorer.jsx";
 import { ShapExplorer } from "./components/ShapExplorer.jsx";
@@ -24,7 +23,7 @@ export default function App() {
   const [text, setText] = useState(DEFAULT_TEXT);
   const [dashboard, setDashboard] = useState(fallbackDashboard());
   const [selectedToken, setSelectedToken] = useState("cannot sleep");
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState("light");
   const [isLoading, setIsLoading] = useState(false);
   const [apiNotice, setApiNotice] = useState("Preview mode: sample payload loaded.");
   const [tab, setTab] = useState("evidence");
@@ -39,7 +38,7 @@ export default function App() {
 
   async function handleAnalyze() {
     setIsLoading(true);
-    setApiNotice("Running MentalBERT, SHAP, Neo4j traversal, and evidence retrieval...");
+    setApiNotice("Running model prediction, token attribution, graph lookup, and evidence retrieval...");
     try {
       const result = await analyzeText(text);
       setDashboard(result);
@@ -48,7 +47,7 @@ export default function App() {
         result.explainability.negativeTokens[0]?.token ||
         "";
       setSelectedToken(firstToken);
-      setApiNotice("Live API result loaded. No post-prediction LLM used.");
+      setApiNotice("Live result loaded from model, graph, and retrieved evidence.");
     } catch (error) {
       setDashboard(fallbackDashboard());
       setApiNotice(`API unavailable, showing sample payload. ${error.message}`);
@@ -76,8 +75,8 @@ export default function App() {
             <Activity size={22} />
           </div>
           <div>
-            <p>CSSRS V2</p>
-            <h1>Explainable Clinical Decision Support</h1>
+          <p>CSSRS research system</p>
+          <h1>Clinical Evidence Review</h1>
           </div>
         </div>
         <div className="topbar-actions">
@@ -99,9 +98,9 @@ export default function App() {
       <section className="hero-strip">
         <div>
           <span className="eyebrow">
-            <ShieldCheck size={14} /> No LLM after prediction
+            <ShieldCheck size={14} /> Evidence-linked output
           </span>
-          <h2>MentalBERT prediction, SHAP attribution, Neo4j graph traversal, retrieved evidence.</h2>
+          <h2>Review detected language, mapped clinical concepts, and source-backed support pathways.</h2>
         </div>
         <div className="patient-chip">
           <span>Research Case</span>
@@ -120,7 +119,7 @@ export default function App() {
           />
         </div>
         <button className="analyze-button" onClick={handleAnalyze} disabled={isLoading}>
-          {isLoading ? <Sparkles size={18} /> : <Search size={18} />}
+          <Search size={18} />
           {isLoading ? "Analyzing" : "Analyze"}
         </button>
       </section>
@@ -167,10 +166,13 @@ export default function App() {
         </motion.section>
 
         <aside className="right-rail">
-          <GraphPanel graph={dashboard.graph} selectedToken={selectedToken} />
+          <PathwayPanel
+            pathways={dashboard.pathways || dashboard.graph.trace}
+            selectedToken={selectedToken}
+            onSelectToken={setSelectedToken}
+          />
         </aside>
       </section>
     </main>
   );
 }
-

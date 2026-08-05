@@ -1,6 +1,5 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import "reactflow/dist/style.css";
 import "./styles.css";
 import App from "./App.jsx";
 
@@ -9,4 +8,3 @@ createRoot(document.getElementById("root")).render(
     <App />
   </React.StrictMode>,
 );
-

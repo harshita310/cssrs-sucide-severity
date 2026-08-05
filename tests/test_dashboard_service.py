@@ -84,5 +84,9 @@ def test_build_dashboard_payload_contains_traceable_evidence_cards():
     assert payload["evidence"][0]["title"] == "APA Suicide Risk Practice Guidance"
     assert payload["evidence"][0]["similarityScore"] > 0.0
     assert payload["graph"]["trace"][0]["token"] == "cannot sleep"
+    assert payload["pathways"][0]["detectedText"] == "cannot sleep"
+    assert payload["pathways"][0]["mappedConcept"] == "Insomnia"
+    assert payload["pathways"][0]["guidance"] == "Sleep Hygiene"
+    assert payload["pathways"][0]["evidenceSource"] == "APA Suicide Risk Practice Guidance"
     assert payload["recommendations"][0]["name"] == "Sleep Hygiene"
     assert payload["exports"]["htmlReport"] == "RESULTS/xai/reports/demo.html"

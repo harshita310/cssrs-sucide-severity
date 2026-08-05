@@ -698,3 +698,224 @@ mark {
   }
 }
 
+/* Human clinical workspace refresh */
+.app.light,
+.app.dark {
+  background: #f4f6f8;
+  color: #172033;
+}
+
+.orbital-grid {
+  display: none;
+}
+
+.topbar {
+  padding: 0 2px 14px;
+  border-bottom: 1px solid #d9e2ec;
+}
+
+.brand-mark {
+  color: #0f766e;
+  background: #ffffff;
+  border-color: #d3dde8;
+  box-shadow: none;
+  border-radius: 8px;
+}
+
+.brand p,
+.workspace-heading p,
+.panel-heading,
+.text-entry label,
+.api-notice,
+.muted-copy {
+  color: #5f6f82;
+}
+
+.ghost-button,
+.primary-button,
+.analyze-button,
+.segmented-tabs button,
+.filter-row button {
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.ghost-button,
+.filter-row button,
+.segmented-tabs button {
+  background: #ffffff;
+  color: #172033;
+  border-color: #d3dde8;
+}
+
+.primary-button,
+.analyze-button {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.hero-strip,
+.analysis-console,
+.panel,
+.workspace-panel {
+  background: #ffffff;
+  border-color: #d3dde8;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(23, 32, 51, 0.06);
+  backdrop-filter: none;
+}
+
+.hero-strip h2 {
+  max-width: 760px;
+  font-size: clamp(22px, 2vw, 30px);
+  color: #172033;
+}
+
+.eyebrow,
+.patient-chip,
+.context-pill {
+  color: #0f766e;
+  background: #ecfdf5;
+  border-color: #99f6e4;
+  border-radius: 8px;
+}
+
+.analysis-console {
+  align-items: end;
+}
+
+.text-entry textarea,
+.literature-controls input {
+  background: #fbfdff;
+  border-color: #cbd6e2;
+}
+
+.dashboard-grid {
+  grid-template-columns: minmax(260px, 0.75fr) minmax(440px, 1.35fr) minmax(360px, 0.95fr);
+}
+
+.risk-card,
+.model-card {
+  background: #f8fbfd;
+  border-color: #cbd6e2;
+  border-radius: 8px;
+}
+
+.risk-card p,
+.model-card p,
+.risk-card span,
+.model-card span,
+.evidence-title p,
+.recommendation-head p,
+.literature-list span,
+.snippet,
+.evidence-footer,
+.metric-row,
+.check-line,
+.trace-step span {
+  color: #4b5c70;
+}
+
+.risk-card strong {
+  color: #0f766e;
+}
+
+.token-button,
+.evidence-card,
+.recommendation-card,
+.literature-list article,
+.pathway-card {
+  background: #ffffff;
+  border: 1px solid #d3dde8;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.token-button.selected,
+.pathway-card.selected {
+  border-color: #0f766e;
+  background: #f0fdfa;
+}
+
+.segmented-tabs button.active,
+.filter-row button.active {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.workspace-panel {
+  min-height: 640px;
+}
+
+.evidence-card {
+  border-left: 4px solid #0f766e;
+}
+
+.pathway-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.pathway-card {
+  padding: 14px;
+}
+
+.pathway-token {
+  display: inline-flex;
+  border: 1px solid #99f6e4;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #0f766e;
+  padding: 5px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pathway-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.pathway-flow span {
+  border: 1px solid #d3dde8;
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: #f8fbfd;
+  font-size: 12px;
+}
+
+.pathway-card p {
+  color: #4b5c70;
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+.pathway-card blockquote {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 10px;
+  border-left: 3px solid #0f766e;
+  background: #f8fbfd;
+  color: #26364a;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.pathway-card a {
+  color: #0f766e;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.app .segmented-tabs button.active,
+.app .filter-row button.active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
+}

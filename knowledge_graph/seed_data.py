@@ -187,6 +187,20 @@ SEED_EVIDENCE = [
         "url": "https://pubmed.ncbi.nlm.nih.gov/",
         "passage": "Behavioral activation targets withdrawal by increasing engagement with meaningful activities.",
     },
+    {
+        "name": "CDC Suicide Prevention Strategies",
+        "source_type": "CDC",
+        "citation": "Centers for Disease Control and Prevention suicide prevention strategies.",
+        "url": "https://www.cdc.gov/suicide/prevention/index.html",
+        "passage": "CDC prevention resources describe connectedness, coping and problem-solving skills, and safer environments as suicide prevention strategies.",
+    },
+    {
+        "name": "SAMHSA Crisis Support Resources",
+        "source_type": "SAMHSA",
+        "citation": "Substance Abuse and Mental Health Services Administration crisis support resources.",
+        "url": "https://www.samhsa.gov/find-help",
+        "passage": "SAMHSA resources describe crisis support pathways and connection to behavioral health support services.",
+    },
 ]
 
 SEED_RESOURCES = [
@@ -295,6 +309,52 @@ SEED_EVIDENCE_DOCUMENTS = [
             }
         ],
     },
+    {
+        "name": "CDC Suicide Prevention Strategies",
+        "source_type": "CDC",
+        "citation": "Centers for Disease Control and Prevention. Suicide prevention strategies.",
+        "url": "https://www.cdc.gov/suicide/prevention/index.html",
+        "sections": [
+            {
+                "title": "Connectedness and coping skills",
+                "chunks": [
+                    {
+                        "chunk_id": "cdc-prevention-001",
+                        "text": "CDC prevention guidance describes strengthening connectedness and improving coping and problem-solving skills as strategies that can reduce suicide risk factors.",
+                        "supports": ["Peer Support", "Grounding Technique", "CBT"],
+                    },
+                    {
+                        "chunk_id": "cdc-prevention-002",
+                        "text": "CDC prevention resources include safer environments, support for people at risk, and connected community approaches as parts of a broader prevention strategy.",
+                        "supports": ["Safety Planning", "Crisis Planning", "Peer Support"],
+                    },
+                ],
+            }
+        ],
+    },
+    {
+        "name": "SAMHSA Crisis Support Resources",
+        "source_type": "SAMHSA",
+        "citation": "Substance Abuse and Mental Health Services Administration. Find help and treatment resources.",
+        "url": "https://www.samhsa.gov/find-help",
+        "sections": [
+            {
+                "title": "Crisis and behavioral health support",
+                "chunks": [
+                    {
+                        "chunk_id": "samhsa-find-help-001",
+                        "text": "SAMHSA describes crisis and behavioral health support resources for people who need immediate or ongoing mental health support.",
+                        "supports": ["Crisis Planning", "Safety Planning", "Peer Support"],
+                    },
+                    {
+                        "chunk_id": "samhsa-find-help-002",
+                        "text": "SAMHSA find-help resources connect people to treatment locators and support services for mental health and substance use needs.",
+                        "supports": ["CBT", "Behavioral Activation", "Mindfulness"],
+                    },
+                ],
+            }
+        ],
+    },
 ]
 
 CONCEPT_INTERVENTION_LINKS = [
@@ -316,13 +376,20 @@ CONCEPT_INTERVENTION_LINKS = [
 INTERVENTION_EVIDENCE_LINKS = [
     ("Safety Planning", "WHO Suicide Prevention Guidance"),
     ("Safety Planning", "NICE Self-harm Guideline"),
+    ("Safety Planning", "CDC Suicide Prevention Strategies"),
+    ("Safety Planning", "SAMHSA Crisis Support Resources"),
     ("Crisis Planning", "WHO Suicide Prevention Guidance"),
+    ("Crisis Planning", "CDC Suicide Prevention Strategies"),
     ("CBT", "APA Suicide Risk Practice Guidance"),
     ("Behavioral Activation", "Behavioral Activation Clinical Review"),
     ("Peer Support", "WHO Suicide Prevention Guidance"),
+    ("Peer Support", "CDC Suicide Prevention Strategies"),
+    ("Peer Support", "SAMHSA Crisis Support Resources"),
     ("Sleep Hygiene", "APA Suicide Risk Practice Guidance"),
     ("Grounding Technique", "APA Suicide Risk Practice Guidance"),
+    ("Grounding Technique", "CDC Suicide Prevention Strategies"),
     ("Mindfulness", "APA Suicide Risk Practice Guidance"),
+    ("Crisis Planning", "SAMHSA Crisis Support Resources"),
 ]
 
 INTERVENTION_RESOURCE_LINKS = [
