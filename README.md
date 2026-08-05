@@ -274,6 +274,12 @@ npm.cmd run dev
 Open `http://127.0.0.1:5173`. If the API is not running, the UI opens with a
 sample payload so the design can still be reviewed.
 
+If another local app is already using `5173`, run:
+
+```powershell
+npm.cmd run dev -- --host 127.0.0.1 --port 5174 --strictPort
+```
+
 ![V2 clinical dashboard](docs/assets/v2_dashboard.png)
 
 V2 API endpoints:
