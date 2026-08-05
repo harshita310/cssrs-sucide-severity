@@ -55,7 +55,12 @@ def _runtime():
 app = FastAPI(title="CSSRS V2 Explainable Clinical Dashboard API")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -127,4 +132,3 @@ def html_report(path: str):
     if reports_root not in report_path.parents or not report_path.exists():
         raise HTTPException(status_code=404, detail="Report not found")
     return FileResponse(report_path, media_type="text/html")
-
