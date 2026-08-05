@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import textwrap
+from base64 import b64decode
 from dataclasses import asdict
 from html import escape
 from pathlib import Path
@@ -15,6 +16,14 @@ DISCLAIMER = (
     "Research decision-support output only; not a diagnosis, treatment plan, "
     "or emergency response tool."
 )
+
+_FALLBACK_PNG = (
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII="
+)
+
+
+def _write_fallback_png(output_path: Path) -> None:
+    output_path.write_bytes(b64decode(_FALLBACK_PNG))
 
 
 def build_report(
@@ -42,7 +51,11 @@ def build_report(
 
 def _plot_shap_chart(report: dict[str, Any], output_path: Path) -> None:
     """Create a simple SHAP token contribution bar chart."""
-    import matplotlib.pyplot as plt
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        _write_fallback_png(output_path)
+        return
 
     factors = []
     factors.extend(report.get("shap", {}).get("positive_factors", []))
@@ -57,20 +70,27 @@ def _plot_shap_chart(report: dict[str, Any], output_path: Path) -> None:
     colors = ["#3b82f6" if value >= 0 else "#ef4444" for value in values]
 
     fig_height = max(3.2, 0.45 * len(labels))
-    fig, ax = plt.subplots(figsize=(8, fig_height))
-    ax.barh(labels, values, color=colors)
-    ax.axvline(0, color="#111827", linewidth=0.8)
-    ax.set_title("Token Contribution Summary")
-    ax.set_xlabel("Attribution value")
-    ax.grid(axis="x", alpha=0.2)
-    fig.tight_layout()
-    fig.savefig(output_path, dpi=160)
-    plt.close(fig)
+    try:
+        fig, ax = plt.subplots(figsize=(8, fig_height))
+        ax.barh(labels, values, color=colors)
+        ax.axvline(0, color="#111827", linewidth=0.8)
+        ax.set_title("Token Contribution Summary")
+        ax.set_xlabel("Attribution value")
+        ax.grid(axis="x", alpha=0.2)
+        fig.tight_layout()
+        fig.savefig(output_path, dpi=160)
+        plt.close(fig)
+    except Exception:
+        _write_fallback_png(output_path)
 
 
 def _plot_graph_path(report: dict[str, Any], output_path: Path) -> None:
     """Create a visual graph-path diagram from mapped concepts to evidence."""
-    import matplotlib.pyplot as plt
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        _write_fallback_png(output_path)
+        return
 
     concept = "Mapped concept"
     if report.get("mapped_concepts"):
@@ -97,37 +117,40 @@ def _plot_graph_path(report: dict[str, Any], output_path: Path) -> None:
         (resource, "#fee2e2"),
     ]
 
-    fig, ax = plt.subplots(figsize=(12, 3.4))
-    ax.set_axis_off()
-    x_positions = [0.07, 0.29, 0.50, 0.72, 0.93]
-    for idx, ((label, color), x_pos) in enumerate(zip(nodes, x_positions)):
-        wrapped_label = "\n".join(textwrap.wrap(label, width=18)) or label
-        ax.text(
-            x_pos,
-            0.55,
-            wrapped_label,
-            ha="center",
-            va="center",
-            fontsize=9,
-            wrap=True,
-            bbox={
-                "boxstyle": "round,pad=0.35",
-                "facecolor": color,
-                "edgecolor": "#374151",
-                "linewidth": 1.0,
-            },
-        )
-        if idx < len(nodes) - 1:
-            ax.annotate(
-                "",
-                xy=(x_positions[idx + 1] - 0.095, 0.55),
-                xytext=(x_pos + 0.095, 0.55),
-                arrowprops={"arrowstyle": "->", "color": "#374151", "lw": 1.4},
+    try:
+        fig, ax = plt.subplots(figsize=(12, 3.4))
+        ax.set_axis_off()
+        x_positions = [0.07, 0.29, 0.50, 0.72, 0.93]
+        for idx, ((label, color), x_pos) in enumerate(zip(nodes, x_positions)):
+            wrapped_label = "\n".join(textwrap.wrap(label, width=18)) or label
+            ax.text(
+                x_pos,
+                0.55,
+                wrapped_label,
+                ha="center",
+                va="center",
+                fontsize=9,
+                wrap=True,
+                bbox={
+                    "boxstyle": "round,pad=0.35",
+                    "facecolor": color,
+                    "edgecolor": "#374151",
+                    "linewidth": 1.0,
+                },
             )
-    ax.set_title("Explanation Graph Path", fontsize=12, pad=12)
-    fig.tight_layout()
-    fig.savefig(output_path, dpi=160)
-    plt.close(fig)
+            if idx < len(nodes) - 1:
+                ax.annotate(
+                    "",
+                    xy=(x_positions[idx + 1] - 0.095, 0.55),
+                    xytext=(x_pos + 0.095, 0.55),
+                    arrowprops={"arrowstyle": "->", "color": "#374151", "lw": 1.4},
+                )
+        ax.set_title("Explanation Graph Path", fontsize=12, pad=12)
+        fig.tight_layout()
+        fig.savefig(output_path, dpi=160)
+        plt.close(fig)
+    except Exception:
+        _write_fallback_png(output_path)
 
 
 def _markdown_report(

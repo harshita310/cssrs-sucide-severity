@@ -104,7 +104,7 @@ def explain_text(
     """Compute SHAP token factors for one input text."""
     try:
         import shap
-    except ImportError as exc:
+    except Exception as exc:
         return _explain_text_occlusion_fallback(
             predictor,
             text,
@@ -113,9 +113,17 @@ def explain_text(
         )
 
     prediction = predictor.predict_one(text)
-    masker = shap.maskers.Text(predictor.tokenizer)
-    explainer = shap.Explainer(predictor.predict_proba, masker)
-    shap_values = explainer([text])
+    try:
+        masker = shap.maskers.Text(predictor.tokenizer)
+        explainer = shap.Explainer(predictor.predict_proba, masker)
+        shap_values = explainer([text])
+    except Exception as exc:
+        return _explain_text_occlusion_fallback(
+            predictor,
+            text,
+            top_k=top_k,
+            import_error=str(exc),
+        )
 
     class_values = shap_values.values[0, :, prediction.label]
     tokens = list(shap_values.data[0])
