@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import {
-  Activity,
   Download,
   FileText,
   Moon,
@@ -10,6 +8,7 @@ import {
   Sun,
 } from "lucide-react";
 import { analyzeText, fallbackDashboard } from "./api.js";
+import { CaseNote } from "./components/CaseNote.jsx";
 import { EvidenceExplorer } from "./components/EvidenceExplorer.jsx";
 import { LiteraturePanel } from "./components/LiteraturePanel.jsx";
 import { PathwayPanel } from "./components/PathwayPanel.jsx";
@@ -67,16 +66,12 @@ export default function App() {
   }
 
   return (
-    <main className={`app ${theme}`}>
-      <div className="orbital-grid" />
-      <header className="topbar">
+    <main className={`app case-file-app ${theme}`}>
+      <header className="topbar case-file-topbar">
         <div className="brand">
-          <div className="brand-mark">
-            <Activity size={22} />
-          </div>
           <div>
-          <p>CSSRS research system</p>
-          <h1>Clinical Evidence Review</h1>
+            <p>C-SSRS severity research file</p>
+            <h1>Case Evidence Review</h1>
           </div>
         </div>
         <div className="topbar-actions">
@@ -95,22 +90,26 @@ export default function App() {
         </div>
       </header>
 
-      <section className="hero-strip">
+      <section className="case-intro">
         <div>
-          <span className="eyebrow">
+          <span className="case-label">
             <ShieldCheck size={14} /> Evidence-linked output
           </span>
-          <h2>Review detected language, mapped clinical concepts, and source-backed support pathways.</h2>
+          <h2>Trace a post from highlighted wording to mapped concepts, evidence excerpts, and support pathways.</h2>
+          <p>
+            This screen is a research case review. It shows what the model detected and which
+            graph-linked documents support the suggested pathway.
+          </p>
         </div>
-        <div className="patient-chip">
-          <span>Research Case</span>
+        <div className="file-tab">
+          <span>Case opened</span>
           <strong>{new Date().toLocaleString()}</strong>
         </div>
       </section>
 
-      <section className="analysis-console">
+      <section className="case-input-row">
         <div className="text-entry">
-          <label htmlFor="clinical-text">Input text</label>
+          <label htmlFor="clinical-text">Edit submitted post</label>
           <textarea
             id="clinical-text"
             value={text}
@@ -125,22 +124,14 @@ export default function App() {
       </section>
       <p className="api-notice">{apiNotice}</p>
 
-      <section className="dashboard-grid">
-        <aside className="left-rail">
-          <PredictionPanel prediction={dashboard.prediction} />
-          <ShapExplorer
-            explainability={dashboard.explainability}
+      <section className="case-file-grid">
+        <section className="case-file-main">
+          <CaseNote
+            text={dashboard.inputPreview || text}
+            concepts={dashboard.concepts}
             selectedToken={selectedToken}
             onSelectToken={setSelectedToken}
           />
-        </aside>
-
-        <motion.section
-          className="center-stage"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-        >
           <div className="segmented-tabs">
             {["evidence", "recommendations", "literature"].map((item) => (
               <button
@@ -163,9 +154,15 @@ export default function App() {
             <RecommendationExplorer recommendations={dashboard.recommendations} />
           )}
           {tab === "literature" && <LiteraturePanel literature={dashboard.literature} />}
-        </motion.section>
+        </section>
 
-        <aside className="right-rail">
+        <aside className="case-file-sidebar">
+          <PredictionPanel prediction={dashboard.prediction} />
+          <ShapExplorer
+            explainability={dashboard.explainability}
+            selectedToken={selectedToken}
+            onSelectToken={setSelectedToken}
+          />
           <PathwayPanel
             pathways={dashboard.pathways || dashboard.graph.trace}
             selectedToken={selectedToken}

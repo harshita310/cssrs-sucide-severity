@@ -919,3 +919,349 @@ mark {
   border-color: #0f766e;
   color: #ffffff;
 }
+
+/* Clinical case file redesign */
+.case-file-app.light,
+.case-file-app.dark {
+  background:
+    linear-gradient(90deg, rgba(17, 24, 39, 0.035) 1px, transparent 1px),
+    linear-gradient(#f7f3eb, #f3efe6);
+  background-size: 48px 48px, auto;
+  color: #243041;
+  padding: 24px;
+}
+
+.case-file-topbar {
+  border-bottom: 1px solid #d8cdbb;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+}
+
+.case-file-topbar .brand {
+  align-items: flex-end;
+}
+
+.case-file-topbar .brand p {
+  color: #786c5c;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+}
+
+.case-file-topbar .brand h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 3vw, 48px);
+  font-weight: 600;
+  color: #1f2a37;
+}
+
+.case-file-app .ghost-button,
+.case-file-app .primary-button,
+.case-file-app .analyze-button {
+  border-radius: 4px;
+  min-height: 38px;
+  box-shadow: none;
+}
+
+.case-file-app .ghost-button {
+  background: #fffaf1;
+  border-color: #d8cdbb;
+  color: #243041;
+}
+
+.case-file-app .primary-button,
+.case-file-app .analyze-button {
+  background: #1f6f63;
+  border-color: #1f6f63;
+  color: #ffffff;
+}
+
+.case-intro,
+.case-input-row,
+.case-note,
+.case-file-app .panel,
+.case-file-app .workspace-panel {
+  background: #fffaf1;
+  border: 1px solid #d8cdbb;
+  border-radius: 6px;
+  box-shadow: 0 10px 28px rgba(72, 58, 37, 0.07);
+}
+
+.case-intro {
+  max-width: 1480px;
+  margin: 0 auto 16px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: start;
+}
+
+.case-label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: #1f6f63;
+  background: #edf7f2;
+  border: 1px solid #b8d8ca;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.case-intro h2 {
+  max-width: 900px;
+  margin: 16px 0 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 3.4vw, 54px);
+  line-height: 1.05;
+  font-weight: 500;
+  color: #1f2a37;
+}
+
+.case-intro p {
+  max-width: 740px;
+  margin: 0;
+  color: #5d6877;
+  line-height: 1.65;
+}
+
+.file-tab {
+  min-width: 190px;
+  padding: 14px;
+  border: 1px solid #d8cdbb;
+  border-radius: 4px;
+  background: #f6efe1;
+  text-align: right;
+}
+
+.file-tab span {
+  display: block;
+  color: #786c5c;
+  font-size: 12px;
+}
+
+.file-tab strong {
+  display: block;
+  margin-top: 5px;
+  color: #243041;
+  font-size: 13px;
+}
+
+.case-input-row {
+  max-width: 1480px;
+  margin: 0 auto 10px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.case-file-app .text-entry textarea,
+.case-file-app .literature-controls input {
+  background: #fffdf8;
+  border-color: #d8cdbb;
+  border-radius: 4px;
+}
+
+.case-file-grid {
+  max-width: 1480px;
+  margin: 16px auto 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 18px;
+  align-items: start;
+}
+
+.case-file-main,
+.case-file-sidebar {
+  display: grid;
+  gap: 14px;
+}
+
+.case-note {
+  padding: 18px;
+}
+
+.case-note-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #786c5c;
+  font-size: 12px;
+}
+
+.case-note-head span {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.case-note-paper {
+  margin-top: 16px;
+  padding: 22px;
+  min-height: 132px;
+  background:
+    linear-gradient(#fffdf8 31px, #eadfce 32px);
+  background-size: 100% 32px;
+  border: 1px solid #eadfce;
+  border-radius: 4px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  line-height: 32px;
+  color: #253142;
+}
+
+.note-highlight {
+  border: 0;
+  border-bottom: 3px solid #d9a441;
+  background: rgba(250, 204, 21, 0.28);
+  color: #1f2a37;
+  padding: 0 2px;
+  cursor: pointer;
+}
+
+.note-highlight.active {
+  background: #fde68a;
+  border-bottom-color: #1f6f63;
+}
+
+.case-concepts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.concept-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #d8cdbb;
+  border-radius: 999px;
+  background: #fffdf8;
+  cursor: pointer;
+}
+
+.concept-note span {
+  color: #786c5c;
+  font-size: 12px;
+}
+
+.concept-note strong {
+  color: #1f6f63;
+  font-size: 13px;
+}
+
+.concept-note.active {
+  border-color: #1f6f63;
+  background: #edf7f2;
+}
+
+.case-file-app .segmented-tabs {
+  background: #efe6d6;
+  border: 1px solid #d8cdbb;
+  border-radius: 6px;
+  padding: 5px;
+}
+
+.case-file-app .segmented-tabs button {
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #5d6877;
+}
+
+.case-file-app .segmented-tabs button.active {
+  background: #fffaf1;
+  color: #1f2a37;
+  box-shadow: inset 0 -2px 0 #1f6f63;
+}
+
+.case-file-app .workspace-panel {
+  min-height: auto;
+  padding: 18px;
+}
+
+.case-file-app .workspace-heading h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  color: #243041;
+}
+
+.case-file-app .evidence-card,
+.case-file-app .recommendation-card,
+.case-file-app .literature-list article,
+.case-file-app .pathway-card,
+.case-file-app .risk-card,
+.case-file-app .model-card {
+  background: #fffdf8;
+  border-color: #d8cdbb;
+  border-radius: 4px;
+}
+
+.case-file-app .evidence-card {
+  border-left: 5px solid #1f6f63;
+}
+
+.case-file-app .metric-row span,
+.case-file-app .linked-row span,
+.case-file-app .pathway-flow span {
+  background: #f6efe1;
+  border-color: #d8cdbb;
+  border-radius: 999px;
+}
+
+.case-file-app .risk-card strong {
+  color: #8a4b20;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.probability-table {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.probability-table div {
+  display: grid;
+  grid-template-columns: 58px 1fr 52px;
+  gap: 8px;
+  align-items: center;
+  color: #5d6877;
+  font-size: 12px;
+}
+
+.probability-table meter {
+  width: 100%;
+}
+
+.case-file-app .pathway-panel {
+  position: sticky;
+  top: 14px;
+}
+
+.case-file-app .pathway-token {
+  background: #edf7f2;
+  border-color: #b8d8ca;
+  color: #1f6f63;
+}
+
+.case-file-app .pathway-card blockquote {
+  background: #f6efe1;
+  border-left-color: #1f6f63;
+  color: #243041;
+}
+
+@media (max-width: 1100px) {
+  .case-file-grid,
+  .case-intro,
+  .case-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .case-file-app .pathway-panel {
+    position: static;
+  }
+}
